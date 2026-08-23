@@ -6,81 +6,88 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.nandaadisaputra.wisata.adapter.WisataAdapter
 import com.nandaadisaputra.wisata.databinding.ActivityMainBinding
 import com.nandaadisaputra.wisata.viewmodel.WisataViewModel
 
 class MainActivity : AppCompatActivity() {
 
-    // Menggunakan ViewBinding untuk menghubungkan file layout XML (activity_main.xml)
-    // ke Activity ini dengan lebih aman tanpa perlu findViewByID.
     private lateinit var binding: ActivityMainBinding
-
-    // Deklarasi adapter yang akan mengatur tampilan tiap baris/item di dalam RecyclerView
     private lateinit var adapter: WisataAdapter
-
-    // Inisialisasi ViewModel menggunakan delegasi 'by viewModels()'.
-    // Keuntungannya: Data wisata tidak akan hilang dan API tidak perlu dipanggil ulang
-    // jika terjadi perubahan konfigurasi (misalnya saat orientasi layar di-rotate/diputar).
     private val viewModel: WisataViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Proses inflate layout dan menetapkannya sebagai tampilan utama aplikasi
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Memanggil fungsi-fungsi untuk menyiapkan komponen UI
         setupRecyclerView()
         observeViewModel()
 
-        // Memicu ViewModel untuk mulai mengambil data wisata dari server melalui API.
-        // Langkah ini dilakukan paling akhir agar UI sudah siap saat data masuk.
-        viewModel.fetchWisata()
+        // Panggil data halaman pertama saat aplikasi pertama kali dijalankan
+        viewModel.fetchWisata(isRefresh = true)
     }
 
     /**
-     * Fungsi khusus untuk mengatur konfigurasi RecyclerView.
+     * Konfigurasi RecyclerView dan pasang Scroll Listener untuk mendeteksi batas bawah layar.
      */
     private fun setupRecyclerView() {
-        // Membuat instance/objek baru dari adapter
         adapter = WisataAdapter()
+        val layoutManager = LinearLayoutManager(this)
 
-        // Mengatur LayoutManager agar daftar ditampilkan secara vertikal dari atas ke bawah
-        binding.rvWisata.layoutManager = LinearLayoutManager(this)
-
-        // Memasang adapter ke RecyclerView yang ada di layout XML
+        binding.rvWisata.layoutManager = layoutManager
         binding.rvWisata.adapter = adapter
+
+        // Listener untuk mendeteksi posisi scroll (Infinite Scrolling)
+        binding.rvWisata.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                // Jika user scroll sampai mendekati item terakhir dan tidak sedang memuat data lain
+                if (!viewModel.isLoadingMore && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                    && firstVisibleItemPosition >= 0
+                ) {
+                    // Minta halaman berikutnya ke ViewModel
+                    viewModel.fetchWisata()
+                }
+            }
+        })
     }
 
     /**
-     * Fungsi untuk "mengamati" (observe) perubahan pada LiveData yang ada di ViewModel.
-     * Tampilan UI (Activity) akan merespons secara otomatis ketika ada perubahan data.
+     * Mengamati perubahan data dari LiveData ViewModel.
      */
     private fun observeViewModel() {
 
-        // 1. Memantau data daftar wisata
+        // Memantau perubahan daftar wisata
         viewModel.wisataList.observe(this) { data ->
-            // Pastikan data tidak kosong sebelum dimasukkan ke adapter
-            if (data != null && data.isNotEmpty()) {
-                // Fungsi setData() ini harus ada di dalam class WisataAdapter kamu
-                adapter.setData(data)
+            if (data != null) {
+                // Perbarui adapter dengan data dan status loading more saat ini
+                adapter.setData(data, viewModel.isLoadingMore)
             }
         }
 
-        // 2. Memantau status loading
+        // Memantau loading utama (tengah layar)
         viewModel.isLoading.observe(this) { isLoading ->
-            // Jika isLoading = true (sedang memuat), ProgressBar muncul, RecyclerView disembunyikan.
-            // Jika isLoading = false (selesai memuat), ProgressBar hilang, RecyclerView muncul.
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-            binding.rvWisata.visibility = if (isLoading) View.GONE else View.VISIBLE
         }
 
-        // 3. Memantau pesan error
+        // Memantau status load more untuk menampilkan/menyembunyikan footer loading di bawah list
+        viewModel.isLoadMore.observe(this) { isLoadMore ->
+            val currentData = viewModel.wisataList.value
+            if (currentData != null) {
+                adapter.setData(currentData, isLoadMore)
+            }
+        }
+
+        // Memantau pesan error
         viewModel.errorMessage.observe(this) { message ->
-            // Jika terdapat pesan error dari API atau koneksi, tampilkan pop-up Toast singkat
-            if (message != null && message.isNotEmpty()) {
+            if (message != null) {
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show()
             }
         }

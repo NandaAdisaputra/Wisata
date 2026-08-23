@@ -4,15 +4,26 @@ import com.nandaadisaputra.wisata.model.WisataResponse
 import com.nandaadisaputra.wisata.network.ApiClient
 import retrofit2.Response
 
+//class WisataRepository {
+//
+//    /**
+//     * Mengambil data wisata dari API.
+//     * Menggunakan 'suspend' karena fungsi ini berjalan secara asynchronous (Coroutine).
+//     * Tipe kembalian didefinisikan secara eksplisit sebagai Response<WisataResponse>
+//     * agar struktur datanya jelas dan mudah dipahami.
+//     */
+//    suspend fun getWisata(): Response<WisataResponse> {
+//        return ApiClient.instance.getWisata()
+//    }
+//}
+
 class WisataRepository {
 
     /**
-     * Mengambil data wisata dari API.
-     * Menggunakan 'suspend' karena fungsi ini berjalan secara asynchronous (Coroutine).
-     * Tipe kembalian didefinisikan secara eksplisit sebagai Response<WisataResponse>
-     * agar struktur datanya jelas dan mudah dipahami.
+     * Fungsi di Repository untuk menjembatani ViewModel dan ApiClient.
+     * Menerima parameter 'page' untuk diteruskan saat memanggil request API.
      */
-    suspend fun getWisata(): Response<WisataResponse> {
-        return ApiClient.instance.getWisata()
+    suspend fun getWisata(page: Int): Response<WisataResponse> {
+        return ApiClient.instance.getWisata(page)
     }
 }

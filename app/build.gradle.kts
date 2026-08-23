@@ -58,6 +58,7 @@ dependencies {
 
     // Image Loader
     implementation(libs.glide)
+
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
 

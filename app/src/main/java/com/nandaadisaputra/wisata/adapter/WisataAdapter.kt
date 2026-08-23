@@ -4,65 +4,88 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.nandaadisaputra.wisata.databinding.ItemLoadingBinding
 import com.nandaadisaputra.wisata.databinding.ItemWisataBinding
 import com.nandaadisaputra.wisata.model.Wisata
 
-class WisataAdapter : RecyclerView.Adapter<WisataAdapter.WisataViewHolder>() {
+// Menggunakan RecyclerView.ViewHolder umum karena adapter ini menangani 2 layout berbeda
+class WisataAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    // Kumpulan data yang akan ditampilkan di dalam RecyclerView
-    private val listWisata = ArrayList<Wisata>()
+    // Menggunakan List nullable (Wisata?) untuk menampung data wisata dan nilai null (sebagai penanda loading)
+    private val listWisata = ArrayList<Wisata?>()
 
-    /**
-     * Fungsi untuk memasukkan data baru ke dalam adapter.
-     * Biasanya dipanggil oleh Activity/Fragment setelah menerima data dari ViewModel.
-     */
-    fun setData(data: List<Wisata>) {
-        listWisata.clear() // Menghapus data lama agar tidak terjadi duplikasi saat memuat ulang
-        listWisata.addAll(data) // Memasukkan data baru dari server
-        notifyDataSetChanged() // Memberi tahu RecyclerView bahwa data berubah, sehingga UI diperbarui
+    companion object {
+        private const val VIEW_TYPE_ITEM = 0    // Penanda untuk item data wisata biasa
+        private const val VIEW_TYPE_LOADING = 1 // Penanda untuk item footer loading di bawah
     }
 
     /**
-     * ViewHolder bertugas sebagai tempat (wadah) untuk menyimpan referensi
-     * elemen-elemen UI (seperti TextView dan ImageView) pada setiap baris item.
+     * Fungsi untuk memperbarui data sekaligus menyisipkan atau menghapus footer loading.
+     */
+    fun setData(data: List<Wisata>, isLoadingMore: Boolean) {
+        listWisata.clear()
+        listWisata.addAll(data)
+
+        // Jika sedang proses load more, tambahkan nilai 'null' di akhir list
+        // sebagai sinyal untuk memunculkan layout loading di bawah.
+        if (isLoadingMore) {
+            listWisata.add(null)
+        }
+        notifyDataSetChanged()
+    }
+
+    /**
+     * Menentukan jenis view (tampilan) berdasarkan isi data pada posisi tertentu.
+     * Jika datanya null, kembalikan tipe loading. Jika berisi objek wisata, kembalikan tipe item.
+     */
+    override fun getItemViewType(position: Int): Int {
+        return if (listWisata[position] == null) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+    }
+
+    /**
+     * ViewHolder untuk menampilkan data wisata biasa.
      */
     inner class WisataViewHolder(private val binding: ItemWisataBinding) :
         RecyclerView.ViewHolder(binding.root) {
-
-        // Fungsi untuk mengikat (memetakan) data dari model Wisata ke elemen UI layout
         fun bind(wisata: Wisata) {
-            // Mengatur teks, menggunakan Elvis Operator (?:) untuk memberikan nilai default
-            // jika seandainya data dari server bernilai null
             binding.tvNamaWisata.text = wisata.namaWisata ?: "Tanpa Nama"
             binding.tvDeskripsi.text = wisata.deskripsi ?: "Tidak ada deskripsi"
 
-            // Menggunakan library Glide untuk memuat gambar dari URL internet ke ImageView.
-            // PERUBAHAN: Diubah dari 'wisata.gambar' menjadi 'wisata.fotoUrl' sesuai struktur Model terbaru.
+            // Memuat gambar menggunakan library Glide
             Glide.with(itemView.context)
                 .load(wisata.fotoUrl)
-                .centerCrop() // Menyesuaikan ukuran gambar agar memenuhi batas ImageView secara proporsional
+                .centerCrop()
                 .into(binding.ivGambar)
         }
     }
 
     /**
-     * Dipanggil saat RecyclerView membutuhkan ViewHolder baru.
-     * Menghubungkan layout per-item (item_wisata.xml) menggunakan ViewBinding.
+     * ViewHolder khusus untuk menampung layout footer loading di bagian bawah.
      */
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WisataViewHolder {
-        val binding = ItemWisataBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return WisataViewHolder(binding)
+    inner class LoadingViewHolder(binding: ItemLoadingBinding) :
+        RecyclerView.ViewHolder(binding.root)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        // Cek tipe view, lalu inflasi layout XML yang bersesuaian
+        return if (viewType == VIEW_TYPE_ITEM) {
+            val binding = ItemWisataBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            WisataViewHolder(binding)
+        } else {
+            val binding = ItemLoadingBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            LoadingViewHolder(binding)
+        }
     }
 
-    /**
-     * Dipanggil oleh RecyclerView untuk menampilkan data pada posisi (indeks) tertentu.
-     */
-    override fun onBindViewHolder(holder: WisataViewHolder, position: Int) {
-        holder.bind(listWisata[position])
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        // Jika holder adalah WisataViewHolder, ikat datanya
+        if (holder is WisataViewHolder) {
+            val wisata = listWisata[position]
+            if (wisata != null) {
+                holder.bind(wisata)
+            }
+        }
+        // Jika LoadingViewHolder, tidak perlu aksi karena ProgressBar di XML akan otomatis berputar
     }
 
-    /**
-     * Mengembalikan total jumlah item wisata yang ada di dalam list.
-     */
     override fun getItemCount(): Int = listWisata.size
 }
