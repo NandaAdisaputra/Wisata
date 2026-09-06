@@ -1,5 +1,6 @@
 package com.nandaadisaputra.wisata.network
 
+import com.nandaadisaputra.wisata.model.DetailWisataResponse
 import com.nandaadisaputra.wisata.model.WisataResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -7,32 +8,51 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-//interface ApiService {
-//
-//    // Pastikan endpoint ini sudah sesuai dengan route API di servermu
-//    @GET("apiwisata/places")
-//
-//    suspend fun getWisata(): Response<WisataResponse>
-//}
 /**
- * Interface ini mendefinisikan rute (endpoint) dari API yang kita gunakan.
+ * Interface ini mendefinisikan rute (endpoint) dari API yang digunakan.
  */
 interface ApiService {
 
-    // Menggunakan anotasi @GET untuk mengakses endpoint API wisata
-    @GET("apiwisata/places")
+    /**
+     * Mengambil daftar tempat wisata secara paginasi.
+     * Endpoint: /apiwisata/places.php?page=1
+     */
+    @GET("apiwisata/places.php")
     suspend fun getWisata(
-        // Menambahkan anotasi @Query("page") untuk mengirim parameter halaman ke server
-        // Contoh: /apiwisata/places?page=1, /apiwisata/places?page=2, dst.
         @Query("page") page: Int
     ): Response<WisataResponse>
 
+    /**
+     * Mencari data tempat wisata berdasarkan kata kunci.
+     * Endpoint: /apiwisata/places.php?search=keyword
+     */
+    @GET("apiwisata/places.php")
+    suspend fun searchWisata(
+        @Query("search") keyword: String
+    ): Response<WisataResponse>
 
-    // Anotasi @POST menandakan metode HTTP POST.
-    // Anotasi @Body akan otomatis mengubah objek AuthRequest menjadi format JSON (Raw).
+    /**
+     * Mengambil detail satu tempat wisata berdasarkan ID (Versi Query Parameter).
+     * Endpoint: /apiwisata/places.php?id=12
+     */
+    @GET("apiwisata/places.php")
+    suspend fun getDetailWisata(
+        @Query("id") id: Int
+    ): Response<DetailWisataResponse>
+
+    /**
+     * Otentikasi Login pengguna.
+     */
     @POST("apiwisata/auth.php?action=login")
-    suspend fun login(@Body request: AuthRequest): Response<AuthResponse>
+    suspend fun login(
+        @Body request: AuthRequest
+    ): Response<AuthResponse>
 
+    /**
+     * Pendaftaran (Register) pengguna baru.
+     */
     @POST("apiwisata/auth.php?action=register")
-    suspend fun register(@Body request: AuthRequest): Response<AuthResponse>
+    suspend fun register(
+        @Body request: AuthRequest
+    ): Response<AuthResponse>
 }

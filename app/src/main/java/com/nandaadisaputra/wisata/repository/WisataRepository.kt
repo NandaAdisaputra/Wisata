@@ -1,29 +1,80 @@
 package com.nandaadisaputra.wisata.repository
 
+import com.nandaadisaputra.wisata.model.Wisata
 import com.nandaadisaputra.wisata.model.WisataResponse
 import com.nandaadisaputra.wisata.network.ApiClient
-import retrofit2.Response
-
-//class WisataRepository {
-//
-//    /**
-//     * Mengambil data wisata dari API.
-//     * Menggunakan 'suspend' karena fungsi ini berjalan secara asynchronous (Coroutine).
-//     * Tipe kembalian didefinisikan secara eksplisit sebagai Response<WisataResponse>
-//     * agar struktur datanya jelas dan mudah dipahami.
-//     */
-//    suspend fun getWisata(): Response<WisataResponse> {
-//        return ApiClient.instance.getWisata()
-//    }
-//}
+import com.nandaadisaputra.wisata.utils.UiState // Sesuaikan dengan lokasi package UiState Anda
 
 class WisataRepository {
 
     /**
-     * Fungsi di Repository untuk menjembatani ViewModel dan ApiClient.
-     * Menerima parameter 'page' untuk diteruskan saat memanggil request API.
+     * Memanggil API untuk mengambil daftar tempat wisata secara paginasi.
+     * @param page Nomor halaman yang ingin dimuat.
+     * @return UiState<WisataResponse> berupa Success atau Error.
      */
-    suspend fun getWisata(page: Int): Response<WisataResponse> {
-        return ApiClient.instance.getWisata(page)
+    suspend fun getWisata(page: Int): UiState<WisataResponse> {
+        return try {
+            val response = ApiClient.instance.getWisata(page)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) {
+                    UiState.Success(body)
+                } else {
+                    UiState.Error("Data wisata kosong dari server")
+                }
+            } else {
+                UiState.Error("Gagal memuat data (${response.code()}): ${response.message()}")
+            }
+        } catch (e: Exception) {
+            UiState.Error(e.localizedMessage ?: "Terjadi kesalahan koneksi internet")
+        }
+    }
+
+    /**
+     * Memanggil API untuk melakukan pencarian berdasarkan kata kunci tempat wisata.
+     * @param keyword Kata kunci nama/lokasi wisata yang dicari user.
+     * @return UiState<WisataResponse> berupa Success atau Error.
+     */
+    suspend fun searchWisata(keyword: String): UiState<WisataResponse> {
+        return try {
+            val response = ApiClient.instance.searchWisata(keyword)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) {
+                    UiState.Success(body)
+                } else {
+                    UiState.Error("Hasil pencarian tidak ditemukan")
+                }
+            } else {
+                UiState.Error("Pencarian gagal (${response.code()}): ${response.message()}")
+            }
+        } catch (e: Exception) {
+            UiState.Error(e.localizedMessage ?: "Terjadi kesalahan koneksi internet")
+        }
+    }
+
+    /**
+     * Memanggil API untuk mengambil detail tempat wisata berdasarkan ID.
+     * @param id ID unik tempat wisata.
+     * @return UiState<Wisata> berupa Success atau Error.
+     */
+    suspend fun getDetailWisata(id: Int): UiState<Wisata> {
+        return try {
+            val response = ApiClient.instance.getDetailWisata(id)
+            if (response.isSuccessful) {
+                val body = response.body()
+                // Mengambil objek data detail (sesuaikan dengan struktur response API Anda)
+                val detailData = body?.data
+                if (detailData != null) {
+                    UiState.Success(detailData)
+                } else {
+                    UiState.Error("Detail wisata tidak ditemukan")
+                }
+            } else {
+                UiState.Error("Gagal memuat detail (${response.code()}): ${response.message()}")
+            }
+        } catch (e: Exception) {
+            UiState.Error(e.localizedMessage ?: "Terjadi kesalahan koneksi internet")
+        }
     }
 }

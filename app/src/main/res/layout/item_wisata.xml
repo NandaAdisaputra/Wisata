@@ -15,9 +15,10 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/ivGambar"
+            android:id="@+id/iv_image"
             android:layout_width="0dp"
             android:layout_height="180dp"
+            android:contentDescription="@string/gambar_wisata"
             android:scaleType="centerCrop"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -25,20 +26,20 @@
             tools:src="@tools:sample/backgrounds/scenic" />
 
         <TextView
-            android:id="@+id/tvNamaWisata"
+            android:id="@+id/tv_name_wisata"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="12dp"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/ivGambar"
+            app:layout_constraintTop_toBottomOf="@id/iv_image"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Nama Wisata" />
 
         <TextView
-            android:id="@+id/tvDeskripsi"
+            android:id="@+id/tv_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
@@ -47,7 +48,7 @@
             android:layout_marginTop="4dp"
             android:maxLines="3"
             android:ellipsize="end"
-            app:layout_constraintTop_toBottomOf="@id/tvNamaWisata"
+            app:layout_constraintTop_toBottomOf="@id/tv_name_wisata"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

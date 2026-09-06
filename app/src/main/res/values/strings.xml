@@ -10,4 +10,9 @@
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="belum_punya_akun_daftar_di_sini">Belum punya akun? Daftar di sini</string>
+    <string name="gambar_wisata">gambar wisata</string>
+    <string name="detail_gambar_wisata">detail gambar wisata</string>
+    <string name="harga_tiket_masuk">Harga Tiket Masuk</string>
+    <string name="deskripsi_wisata">Deskripsi Wisata</string>
+    <string name="buka_di_google_maps">Buka di Google Maps</string>
 </resources>

@@ -56,6 +56,9 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.coroutines.android)
 
+    //swiperefresh
+    implementation(libs.androidx.swiperefreshlayout)
+
     // Image Loader
     implementation(libs.glide)
 

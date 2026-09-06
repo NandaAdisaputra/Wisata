@@ -1,83 +1,101 @@
 package com.nandaadisaputra.wisata.ui.activity
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.nandaadisaputra.wisata.databinding.ActivityLoginBinding
 import com.nandaadisaputra.wisata.network.AuthRequest
-import com.nandaadisaputra.wisata.utils.UiState
+import com.nandaadisaputra.wisata.utils.clearInputErrors
+import com.nandaadisaputra.wisata.utils.hideKeyboard
+import com.nandaadisaputra.wisata.utils.observeUiState
+import com.nandaadisaputra.wisata.utils.setOnSingleClickListener
+import com.nandaadisaputra.wisata.utils.showToast
+import com.nandaadisaputra.wisata.utils.startActivity
+import com.nandaadisaputra.wisata.utils.trimmedText
 import com.nandaadisaputra.wisata.viewmodel.AuthViewModel
-import kotlin.getValue
 
+/**
+ * LoginActivity mengelola alur autentikasi masuk pengguna,
+ * validasi input kredensial, serta navigasi menuju MainActivity setelah sukses login.
+ */
 class LoginActivity : AppCompatActivity() {
 
-    // Menggunakan ViewBinding agar tidak perlu findViewById
     private lateinit var binding: ActivityLoginBinding
-
-    // Inisialisasi ViewModel
     private val viewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Panggil fungsi untuk memantau perubahan data
         setupObservers()
+        setupActionListeners()
+    }
 
-        // Aksi ketika tombol Login diklik
-        binding.btnLogin.setOnClickListener {
-            val username = binding.edtUsername.text.toString().trim()
-            val password = binding.edtPassword.text.toString().trim()
+    /**
+     * Mengatur listener event klik untuk tombol Login dan navigasi ke RegisterActivity.
+     */
+    private fun setupActionListeners() {
+        binding.btnLogin.setOnSingleClickListener {
+            hideKeyboard()
 
-            // Validasi input tidak boleh kosong
-            if (username.isNotEmpty() && password.isNotEmpty()) {
-                // Panggil fungsi login di ViewModel
-                viewModel.login(AuthRequest(username, password))
-            } else {
-                Toast.makeText(this, "Harap isi semua kolom!", Toast.LENGTH_SHORT).show()
+            // Membaca teks terisi menggunakan extension property trimmedText
+            val username = binding.edtUsername.trimmedText
+            val password = binding.edtPassword.trimmedText
+
+            // Reset indikator error lokal menggunakan fungsi variadic clearInputErrors()
+            clearInputErrors(binding.edtUsername, binding.edtPassword)
+
+            when {
+                username.isEmpty() -> {
+                    binding.edtUsername.error = "Username tidak boleh kosong!"
+                    binding.edtUsername.requestFocus()
+                }
+                password.isEmpty() -> {
+                    binding.edtPassword.error = "Password tidak boleh kosong!"
+                    binding.edtPassword.requestFocus()
+                }
+                else -> {
+                    viewModel.login(AuthRequest(username, password))
+                }
             }
         }
 
-        // Aksi ketika teks "Belum punya akun?" diklik
-        binding.tvGoToRegister.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+        binding.tvGoToRegister.setOnSingleClickListener {
+            // Menggunakan extension generic startActivity<T>()
+            startActivity<RegisterActivity>()
         }
     }
 
+    /**
+     * Memantau perubahan status aliran data (UiState) dari loginState pada AuthViewModel.
+     */
     private fun setupObservers() {
-        // Pantau (observe) loginState dari ViewModel
-        viewModel.loginState.observe(this) { state ->
-            when (state) {
-                is UiState.Loading -> {
-                    // Tampilkan loading, matikan tombol agar user tidak spam klik
-                    binding.progressBar.visibility = View.VISIBLE
-                    binding.btnLogin.isEnabled = false
-                }
-                is UiState.Success -> {
-                    // Sembunyikan loading, nyalakan kembali tombol
-                    binding.progressBar.visibility = View.GONE
-                    binding.btnLogin.isEnabled = true
+        observeUiState(
+            liveData = viewModel.loginState,
+            progressBar = binding.progressBar,
+            onLoading = {
+                // 1. Matikan tombol login untuk mencegah spam click
+                binding.btnLogin.isEnabled = false
 
-                    Toast.makeText(this, state.data.message, Toast.LENGTH_SHORT).show()
+                // 2. Bersihkan tampilan error pada input field saat proses loading dimulai
+                clearInputErrors(binding.edtUsername, binding.edtPassword)
+            },
+            onSuccess = { response ->
+                binding.btnLogin.isEnabled = true
+                showToast(response.message)
 
-                    // Arahkan ke MainActivity setelah login sukses
-                    val intent = Intent(this, MainActivity::class.java)
-                    // Hapus riwayat (stack) agar saat di MainActivity, user klik tombol back tidak kembali ke Login
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
-                }
-                is UiState.Error -> {
-                    // Sembunyikan loading, nyalakan tombol, tampilkan pesan error dari API
-                    binding.progressBar.visibility = View.GONE
-                    binding.btnLogin.isEnabled = true
-                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
-                }
+                // Navigasi ke MainActivity dengan flag CLEAR_TASK
+                startActivity<MainActivity>(clearTask = true)
+                finish()
+            },
+            onError = { message ->
+                binding.btnLogin.isEnabled = true
+
+                // Tampilkan pesan kesalahan dari API melalui Toast
+                showToast(message)
             }
-        }
+        )
     }
 }
