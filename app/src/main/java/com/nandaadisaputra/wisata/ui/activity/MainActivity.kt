@@ -121,11 +121,11 @@ class MainActivity : AppCompatActivity() {
         // Memantau perubahan UiState utama (Loading, Success, dan Error)
         observeUiState(
             liveData = viewModel.wisataState,
-            progressBar = binding.progressBar,
+            progressBar = binding.progresBar,
             onLoading = {
                 // Sembunyikan ProgressBar tengah jika loading berasal dari SwipeRefresh atau Load More
                 if (viewModel.isLoadingMore || binding.swipeRefresh.isRefreshing) {
-                    binding.progressBar.hide() // Menggunakan hide() dari Helper.kt
+                    binding.progresBar.hide() // Menggunakan hide() dari Helper.kt
                 }
             },
             onSuccess = { wisataList ->

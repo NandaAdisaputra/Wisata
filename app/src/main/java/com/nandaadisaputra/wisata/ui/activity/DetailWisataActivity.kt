@@ -26,11 +26,6 @@ class DetailWisataActivity : AppCompatActivity() {
     // Inisialisasi ViewModel khusus detail menggunakan delegate viewModels()
     private val viewModel: DetailWisataViewModel by viewModels()
 
-    companion object {
-        const val EXTRA_WISATA = "extra_wisata"
-        const val EXTRA_ID = "extra_id"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -118,5 +113,9 @@ class DetailWisataActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return true
+    }
+    companion object {
+        const val EXTRA_WISATA = "extra_wisata"
+        const val EXTRA_ID = "extra_id"
     }
 }
