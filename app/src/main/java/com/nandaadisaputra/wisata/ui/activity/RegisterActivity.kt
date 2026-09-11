@@ -4,7 +4,10 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.nandaadisaputra.wisata.databinding.ActivityRegisterBinding
+import com.nandaadisaputra.wisata.network.ApiClient
 import com.nandaadisaputra.wisata.network.AuthRequest
+import com.nandaadisaputra.wisata.repository.AuthRepository
+import com.nandaadisaputra.wisata.utils.SessionManager
 import com.nandaadisaputra.wisata.utils.UiState
 import com.nandaadisaputra.wisata.utils.hide
 import com.nandaadisaputra.wisata.utils.hideKeyboard
@@ -12,6 +15,7 @@ import com.nandaadisaputra.wisata.utils.setOnSingleClickListener
 import com.nandaadisaputra.wisata.utils.show
 import com.nandaadisaputra.wisata.utils.showToast
 import com.nandaadisaputra.wisata.viewmodel.AuthViewModel
+import com.nandaadisaputra.wisata.viewmodel.AuthViewModelFactory
 
 /**
  * RegisterActivity mengelola alur pendaftaran akun baru pengguna,
@@ -22,8 +26,10 @@ class RegisterActivity : AppCompatActivity() {
     // Menampung referensi objek ViewBinding untuk mengakses elemen UI tanpa findViewById
     private lateinit var binding: ActivityRegisterBinding
 
-    // Inisialisasi AuthViewModel menggunakan 'by viewModels()' dari ktx library (Lifecycle Aware)
-    private val viewModel: AuthViewModel by viewModels()
+    // Inisialisasi AuthViewModel menggunakan Factory Pattern untuk menyuntikkan dependensi
+    private val viewModel: AuthViewModel by viewModels {
+        AuthViewModelFactory(AuthRepository(ApiClient.instance, SessionManager(this)))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

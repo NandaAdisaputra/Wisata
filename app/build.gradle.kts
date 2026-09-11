@@ -62,6 +62,10 @@ dependencies {
     // Image Loader
     implementation(libs.glide)
 
+    implementation(libs.androidx.fragment.ktx)
+
+    implementation(libs.androidx.datastore.preferences)
+
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
 

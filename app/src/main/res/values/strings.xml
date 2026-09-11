@@ -15,4 +15,7 @@
     <string name="harga_tiket_masuk">Harga Tiket Masuk</string>
     <string name="deskripsi_wisata">Deskripsi Wisata</string>
     <string name="buka_di_google_maps">Buka di Google Maps</string>
+    <string name="ini_halaman_favorit">Ini Halaman Favorit</string>
+    <string name="logout">Logout</string>
+    <string name="aplikasi_wisata">Aplikasi Wisata</string>
 </resources>

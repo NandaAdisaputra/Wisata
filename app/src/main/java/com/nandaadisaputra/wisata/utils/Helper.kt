@@ -23,6 +23,7 @@ import com.nandaadisaputra.wisata.ui.activity.DetailWisataActivity
 import java.text.NumberFormat
 import java.util.Locale
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.Fragment
 
 // ============================================================================
 // 1. VIEW & VISIBILITY EXTENSIONS
@@ -251,7 +252,34 @@ fun <T> AppCompatActivity.observeUiState(
         }
     }
 }
-
+/**
+ * Extension function observeUiState khusus untuk Fragment.
+ * Menggunakan viewLifecycleOwner untuk menghindari memory leak.
+ */
+fun <T> Fragment.observeUiStateFragment(
+    liveData: LiveData<UiState<T>>,
+    progressBar: View? = null,
+    onLoading: () -> Unit = {},
+    onSuccess: (T) -> Unit = {},
+    onError: (String) -> Unit = {}
+) {
+    liveData.observe(viewLifecycleOwner) { state ->
+        when (state) {
+            is UiState.Loading -> {
+                progressBar?.show()
+                onLoading()
+            }
+            is UiState.Success -> {
+                progressBar?.hide()
+                onSuccess(state.data)
+            }
+            is UiState.Error -> {
+                progressBar?.hide()
+                onError(state.message)
+            }
+        }
+    }
+}
 // ============================================================================
 // 9. RECYCLERVIEW & SEARCHVIEW EXTENSION FUNCTIONS
 // ============================================================================

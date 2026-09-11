@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Wisata">
         <activity
-            android:name=".ui.activity.LoginActivity"
+            android:name=".ui.activity.SplashActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -26,6 +26,10 @@
         </activity>
         <activity
             android:name=".ui.activity.MainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.activity.LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
