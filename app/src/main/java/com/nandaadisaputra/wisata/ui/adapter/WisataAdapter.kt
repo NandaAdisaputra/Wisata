@@ -1,4 +1,4 @@
-package com.nandaadisaputra.wisata.adapter
+package com.nandaadisaputra.wisata.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

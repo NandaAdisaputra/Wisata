@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.fragment.app.viewModels
-import com.nandaadisaputra.wisata.adapter.WisataAdapter
+import com.nandaadisaputra.wisata.ui.adapter.WisataAdapter
 import com.nandaadisaputra.wisata.databinding.FragmentHomeBinding
 import com.nandaadisaputra.wisata.utils.UiState
 import com.nandaadisaputra.wisata.utils.addInfiniteScrollListener

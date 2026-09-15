@@ -18,4 +18,9 @@
     <string name="ini_halaman_favorit">Ini Halaman Favorit</string>
     <string name="logout">Logout</string>
     <string name="aplikasi_wisata">Aplikasi Wisata</string>
+    <string name="home">Home</string>
+    <string name="favorit">Favorit</string>
+    <string name="profil">Profil</string>
+    <string name="tombol_favorit">Tombol Favorit</string>
+    <string name="belum_ada_wisata_favorit">Belum ada wisata favorit</string>
 </resources>

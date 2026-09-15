@@ -22,6 +22,10 @@ class DetailWisataViewModel : ViewModel() {
     // LiveData publik yang diamati oleh DetailWisataActivity
     val detailState: LiveData<UiState<Wisata>> = _detailState
 
+    // LiveData untuk memantau status apakah wisata ini adalah favorit
+    private val _isFavorite = MutableLiveData<Boolean>()
+    val isFavorite: LiveData<Boolean> = _isFavorite
+
     /**
      * Memanggil API detail tempat wisata dari repository berdasarkan ID.
      * @param id Unique ID dari tempat wisata yang dipilih.

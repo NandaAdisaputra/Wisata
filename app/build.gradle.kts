@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.parcelize)
+    // 1. Tambahkan plugin KSP di sini
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -55,6 +57,16 @@ dependencies {
     // MVVM & Coroutines
     implementation(libs.androidx.activity.ktx)
     implementation(libs.coroutines.android)
+
+    //Tambahkan implementasi Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler) // Gunakan ksp untuk compiler-nya
+
+    //Tambahkan implementasi Lifecycle
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+
 
     //swiperefresh
     implementation(libs.androidx.swiperefreshlayout)
