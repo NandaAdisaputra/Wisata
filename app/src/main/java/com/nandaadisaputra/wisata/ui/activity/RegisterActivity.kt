@@ -17,92 +17,89 @@ import com.nandaadisaputra.wisata.utils.showToast
 import com.nandaadisaputra.wisata.viewmodel.AuthViewModel
 import com.nandaadisaputra.wisata.viewmodel.AuthViewModelFactory
 
-/**
- * RegisterActivity mengelola alur pendaftaran akun baru pengguna,
- * validasi input formulir, serta penanganan status UI berdasarkan respons ViewModel.
- */
+// RegisterActivity mengelola alur pendaftaran akun baru pengguna, validasi input formulir, serta penanganan status UI berdasarkan respons ViewModel
 class RegisterActivity : AppCompatActivity() {
 
-    // Menampung referensi objek ViewBinding untuk mengakses elemen UI tanpa findViewById
+    // Properti binding untuk mengakses elemen UI pada layout activity_register.xml secara aman (View Binding)
     private lateinit var binding: ActivityRegisterBinding
 
-    // Inisialisasi AuthViewModel menggunakan Factory Pattern untuk menyuntikkan dependensi
+    // Inisialisasi AuthViewModel menggunakan ViewModelProvider Factory (AuthViewModelFactory) secara lazy
     private val viewModel: AuthViewModel by viewModels {
         AuthViewModelFactory(AuthRepository(ApiClient.instance, SessionManager(this)))
     }
 
+    // Method siklus hidup (lifecycle) yang dipanggil saat Activity pertama kali dibuat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inflate layout XML activity_register ke dalam ViewBinding
+        // Meng-inflate layout XML activity_register ke dalam objek ViewBinding
         binding = ActivityRegisterBinding.inflate(layoutInflater)
+        // Menetapkan tampilan UI utama Activity menggunakan root View dari binding
         setContentView(binding.root)
 
-        // Pasang pemantau (observer) data dari ViewModel
+        // Memasang pemantau (observer) LiveData untuk mendengarkan perubahan status dari ViewModel
         setupObservers()
 
-        // Listener saat tombol 'Daftar' diklik (menggunakan setOnSingleClickListener pencegah double-click)
+        // Event listener saat tombol 'Daftar' diklik (menggunakan setOnSingleClickListener untuk mencegah klik ganda/spam)
         binding.btnRegister.setOnSingleClickListener {
-            // Menyembunyikan keyboard virtual agar tidak menutupi indikator loading
+            // Menyembunyikan papan ketik (keyboard) virtual agar tidak menghalangi indikator loading/UI
             hideKeyboard()
 
-            // Membaca teks dari EditText dan menghapus spasi berlebih di awal/akhir
+            // Membaca input teks dari EditText dan menghapus spasi berlebih di awal/akhir string
             val username = binding.edtUsername.text.toString().trim()
             val password = binding.edtPassword.text.toString().trim()
 
-            // Validasi ketersediaan teks pada formulir
+            // Validasi kelengkapan teks pada formulir pendaftaran
             if (username.isNotEmpty() && password.isNotEmpty()) {
-                // Mengirimkan data pendaftaran ke server melalui ViewModel
+                // Mengirimkan permintaan data pendaftaran ke server melalui AuthViewModel
                 viewModel.register(AuthRequest(username, password))
             } else {
-                // Menampilkan Toast peringatan jika input belum lengkap
+                // Menampilkan pesan Toast peringatan jika ada input field yang belum terisi
                 showToast("Harap isi semua kolom!")
             }
         }
 
-        // Listener saat teks 'Sudah punya akun? Login' diklik (menggunakan setOnSingleClickListener)
+        // Event listener saat teks 'Sudah punya akun? Login' diklik untuk kembali ke halaman login
         binding.tvGoToLogin.setOnSingleClickListener {
-            // Mengakhiri RegisterActivity dan kembali ke LoginActivity di tumpukan sebelumnya
+            // Mengakhiri RegisterActivity dan kembali ke Activity sebelumnya (LoginActivity) pada tumpukan (backstack)
             finish()
         }
     }
 
-    /**
-     * Memantau perubahan status aliran data (UiState) dari registerState pada AuthViewModel.
-     */
+    // Memantau perubahan status aliran data (UiState) dari registerState pada AuthViewModel
     private fun setupObservers() {
         viewModel.registerState.observe(this) { state ->
             when (state) {
-                // 1. Kondisi saat proses request registrasi sedang berjalan di background
+                // 1. Kondisi saat proses request registrasi sedang berjalan di background thread
                 is UiState.Loading -> {
-                    // Memunculkan ProgressBar menggunakan extension function show()
+                    // Memunculkan indikator ProgressBar menggunakan fungsi ekstensi show()
                     binding.progressBar.show()
-                    // Mematikan tombol register untuk mencegah aksi klik berulang (double-click/spam)
+                    // Mematikan tombol register agar pengguna tidak dapat menekan tombol secara berulang saat loading
                     binding.btnRegister.isEnabled = false
                 }
 
-                // 2. Kondisi saat pendaftaran akun berhasil diproses oleh server
+                // 2. Kondisi saat pendaftaran akun berhasil diproses dan dikonfirmasi oleh server
                 is UiState.Success -> {
-                    // Menyembunyikan ProgressBar menggunakan extension function hide()
+                    // Menyembunyikan ProgressBar menggunakan fungsi ekstensi hide()
                     binding.progressBar.hide()
-                    // Memulihkan status tombol register
+                    // Mengaktifkan kembali status interaksi tombol register
                     binding.btnRegister.isEnabled = true
 
-                    // Memberikan konfirmasi berhasil kepada pengguna
+                    // Memberikan pesan konfirmasi keberhasilan registrasi kepada pengguna
                     showToast("Registrasi sukses! Silakan Login")
 
-                    // Mengakhiri activity ini agar pengguna langsung kembali ke layar Login
+                    // Mengakhiri activity ini agar pengguna otomatis kembali ke halaman Login
                     finish()
                 }
 
-                // 3. Kondisi saat pendaftaran gagal (misal: username sudah terpakai atau koneksi terputus)
+                // 3. Kondisi saat pendaftaran gagal (misal: username telah terdaftar atau koneksi internet terputus)
                 is UiState.Error -> {
-                    // Menyembunyikan ProgressBar
+                    // Menyembunyikan indikator ProgressBar
                     binding.progressBar.hide()
-                    // Mengaktifkan kembali tombol agar pengguna dapat mencoba ulang
+                    // Mengaktifkan kembali tombol agar pengguna dapat memperbaiki data dan mencoba lagi
                     binding.btnRegister.isEnabled = true
 
-                    // Menampilkan pesan kesalahan resmi dari server/API
+                    // Menampilkan pesan kesalahan resmi yang didapatkan dari respons server/API
                     showToast(state.message)
                 }
             }

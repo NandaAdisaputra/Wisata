@@ -5,12 +5,17 @@
     <color name="white">#FFFFFFFF</color>
 
     <!-- Warna Khusus untuk Tampilan Detail Wisata -->
-    <color name="category_bg">#E3F2FD</color>       <!-- Latar belakang badge kategori (Biru Muda) -->
-    <color name="category_text">#1976D2</color>     <!-- Teks badge kategori (Biru Utama) -->
+    <!-- Background kategori/badge -->
+    <color name="category_bg">#E3F2FD</color>
+    <!--Ubah dari #1976D2 ke #1565C0 atau #0D47A1 agar kontras >= 4.50 -->
+    <color name="category_text">#1565C0</color>
     <color name="text_primary">#212121</color>      <!-- Teks judul utama & nama tempat (Hitam Pekat) -->
     <color name="text_secondary">#757575</color>    <!-- Teks sekunder / lokasi (Abu-abu Sedang) -->
     <color name="text_medium">#616161</color>       <!-- Teks label biasa / harga tiket (Abu-abu Gelap) -->
     <color name="text_body">#424242</color>         <!-- Teks paragraf deskripsi (Abu-abu Gelap) -->
     <color name="divider_color">#E0E0E0</color>     <!-- Garis pemisah / divider (Abu-abu Terang) -->
     <color name="price_color">#2E7D32</color>       <!-- Teks harga tiket (Hijau) -->
+
+    <!-- Warna tombol/elemen utama -->
+    <color name="primary_color">#1565C0</color>
 </resources>

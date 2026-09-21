@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Root Layout diubah menjadi ConstraintLayout agar tombol Like bisa melayang -->
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,10 +8,11 @@
 
     <!-- ScrollView untuk konten yang bisa di-scroll -->
     <ScrollView
+        android:id="@+id/scroll_view_detail"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/layout_action_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -19,7 +20,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="88dp"> <!-- Padding bawah ditambah agar teks tidak tertutup tombol Love -->
+            android:paddingBottom="36dp">
 
             <!-- Gambar Header Wisata -->
             <ImageView
@@ -150,19 +151,58 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <!-- Tombol Like / Love (Melayang di pojok kanan bawah) -->
+    <!-- FloatingActionButton Favorite (Melayang tepat di atas bar tombol) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_favorite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="-28dp"
         android:contentDescription="@string/tombol_favorit"
         android:src="@drawable/ic_favorite_black"
         app:backgroundTint="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/layout_action_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@null" />
+
+    <!-- Container Tombol Aksi (Edit & Hapus) di Bagian Bawah -->
+    <LinearLayout
+        android:id="@+id/layout_action_buttons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Tombol Edit -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_edit_wisata"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="@string/edit_wisata"
+            android:textColor="@color/design_default_color_primary"
+            app:strokeColor="@color/design_default_color_primary" />
+
+        <!-- Tombol Hapus -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_hapus_wisata"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/design_default_color_error"
+            android:text="@string/hapus_wisata"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
     <!-- Indikator Loading -->
     <ProgressBar
         android:id="@+id/progress_bar"

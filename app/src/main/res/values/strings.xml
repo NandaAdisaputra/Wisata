@@ -23,4 +23,10 @@
     <string name="profil">Profil</string>
     <string name="tombol_favorit">Tombol Favorit</string>
     <string name="belum_ada_wisata_favorit">Belum ada wisata favorit</string>
+    <string name="tambah_wisata">Tambah Wisata</string>
+    <string name="edit_wisata">Edit Wisata</string>
+    <string name="hapus_wisata">Hapus Wisata</string>
+    <string name="kategori_misal_alam_sejarah_kuliner">Kategori (misal: Alam, Sejarah, Kuliner)</string>
+    <string name="url_gambar_foto_wisata">URL Gambar / Foto Wisata</string>
+    <string name="simpan_perubahan">Simpan Perubahan</string>
 </resources>

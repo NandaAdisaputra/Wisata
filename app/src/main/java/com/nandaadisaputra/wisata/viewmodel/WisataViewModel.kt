@@ -4,123 +4,115 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nandaadisaputra.wisata.model.BaseResponse
 import com.nandaadisaputra.wisata.model.Wisata
 import com.nandaadisaputra.wisata.repository.WisataRepository
 import com.nandaadisaputra.wisata.utils.UiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
-/**
- * ViewModel bertugas mengelola data UI dan logika bisnis untuk layar Wisata.
- * ViewModel akan bertahan dari perubahan konfigurasi (seperti rotasi layar).
- */
+// Kelas ViewModel yang bertugas mengelola status data (UI State), logika bisnis, dan komunikasi dengan Repository untuk data Wisata
 class WisataViewModel : ViewModel() {
 
-    // Instance repository untuk melakukan pemanggilan API
+    // Inisialisasi sumber data (Repository) yang menangani pemanggilan API/Remote Data
     private val repository = WisataRepository()
 
-    // LiveData privat yang menyimpan kondisi UI (Loading, Success, Error)
+    // LiveData privat (Mutable) untuk menyimpan UI State daftar tempat wisata
     private val _wisataState = MutableLiveData<UiState<List<Wisata>>>()
-    // LiveData publik yang diamati (observe) oleh Activity/Fragment (Immutable)
+    // LiveData publik (Read-Only) yang diamati oleh UI (Fragment/Activity) untuk pembaruan daftar wisata
     val wisataState: LiveData<UiState<List<Wisata>>> = _wisataState
 
-    // LiveData privat untuk menandai status footer loading (pagiansi bawah)
+    // LiveData privat untuk mengontrol visibilitas indikator loading pagination (Load More)
     private val _isLoadMore = MutableLiveData<Boolean>()
-    // LiveData publik untuk memantau status footer loading dari Activity/Fragment
+    // LiveData publik untuk mendeteksi status proses Load More pada UI
     val isLoadMore: LiveData<Boolean> = _isLoadMore
 
-    // List lokal mutable untuk menampung seluruh akumulasi data wisata dari paginasi
+    // LiveData privat untuk menyimpan status/respon dari operasi CRUD (Tambah, Edit, Hapus)
+    private val _crudState = MutableLiveData<UiState<BaseResponse>?>()
+    // LiveData publik yang diamati oleh UI untuk merespons hasil aksi CRUD
+    val crudState: LiveData<UiState<BaseResponse>?> = _crudState
+
+    // Daftar buffer lokal untuk menggabungkan data antar-halaman pada fitur pagination
     private val currentList = mutableListOf<Wisata>()
 
-    // Halaman yang sedang dimuat saat ini (dimulai dari halaman 1)
+    // Variabel kontrol untuk pelacakan halaman pagination dan status permintaan
     private var currentPage = 1
-    // Total halaman yang tersedia dari response server (default 1)
     private var totalPage = 1
-    // Flag penanda untuk mencegah pemanggilan 'load more' ganda secara bersamaan
     var isLoadingMore = false
-    // Flag penanda apakah pengguna sedang dalam mode pencarian
     private var isSearching = false
 
-    /**
-     * Memuat data tempat wisata secara paginasi (Load More & Refresh)
-     * @param isRefresh Jika true, akan mereset halaman dan memuat data dari awal (halaman 1)
-     */
+    // Fungsi utama untuk mengambil daftar data wisata (mendukung pagination dan swipe refresh)
     fun fetchWisata(isRefresh: Boolean = false) {
-        // Mencegah pemanggilan paginasi biasa jika sedang dalam mode pencarian
+        // Jika sedang dalam pencarian dan bukan minta refresh, abaikan permintaan fetch pagination biasa
         if (isSearching && !isRefresh) return
 
-        // Jika tombol/gesture Refresh dipicu (misal: SwipeRefreshLayout)
+        // Jika melakukan Refresh (misal: SwipeRefresh): Reset halaman, status, dan bersihkan daftar data lokal
         if (isRefresh) {
-            currentPage = 1             // Reset halaman ke awal
-            totalPage = 1               // Reset total halaman
-            isLoadingMore = false        // Reset status load more
-            isSearching = false          // Matikan mode pencarian
-            currentList.clear()          // Bersihkan cache list lokal
+            currentPage = 1
+            totalPage = 1
+            isLoadingMore = false
+            isSearching = false
+            currentList.clear()
         }
 
-        // Jika halaman saat ini sudah melebihi total halaman server dan bukan refresh, batalkan request
+        // Jika halaman saat ini melebihi total halaman yang tersedia dan bukan mode refresh, hentikan fetching
         if (currentPage > totalPage && !isRefresh) return
 
+        // Jalankan proses asynchronous menggunakan Coroutine pada viewModelScope
         viewModelScope.launch {
-            // Tentukan indikator loading berdasarkan posisi halaman
+            // Jika memuat halaman pertama, tampilkan State Loading utama (ProgressBar tengah)
             if (currentPage == 1) {
-                // Tampilkan status Loading utama di tengah layar jika memuat halaman pertama
                 _wisataState.value = UiState.Loading
             } else {
-                // Tampilkan indikator loading footer di bawah RecyclerView untuk halaman lanjutan
+                // Jika memuat halaman selanjutnya (Pagination), aktifkan penanda Load More (Loading bawah)
                 isLoadingMore = true
                 _isLoadMore.value = true
             }
 
             try {
-                // Jeda buatan 2 detik khusus halaman lanjutan agar animasi loading footer terlihat jelas
-                if (currentPage > 1) delay(2000)
+                // Memberikan penundaan buatan 1 detik untuk pengalaman visual pagination yang halus pada halaman > 1
+                if (currentPage > 1) delay(1000)
 
-                // Memanggil repository yang mengembalikan UiState<WisataResponse>
+                // Mengambil data dari repository berdasarkan halaman aktif
                 when (val result = repository.getWisata(currentPage)) {
                     is UiState.Success -> {
                         val body = result.data
                         val newData = body.data ?: emptyList()
                         totalPage = body.meta?.totalPage ?: 1
 
-                        // Tambahkan data baru dari server ke dalam list lokal
+                        // Tambahkan data baru ke dalam daftar lokal dan kirim daftar gabungan terbaru ke UI
                         currentList.addAll(newData)
-
-                        // Kirim salinan list data terbaru ke UI sebagai UiState.Success
                         _wisataState.value = UiState.Success(currentList.toList())
 
-                        // Naikkan nomor halaman jika belum mencapai batas maksimum totalPage
+                        // Naikkan nomor halaman jika masih tersedia halaman berikutnya
                         if (currentPage <= totalPage) currentPage++
                     }
 
                     is UiState.Error -> {
-                        // Jika gagal pada halaman pertama, tampilkan layar error utama.
-                        // Jika gagal pada load more, pertahankan list yang sudah ada agar tidak hilang.
+                        // Jika halaman 1 atau list masih kosong lalu error, kirimkan Error State ke UI
                         if (currentPage == 1 || currentList.isEmpty()) {
                             _wisataState.value = UiState.Error(result.message)
                         } else {
+                            // Jika error terjadi saat load more, tetap tampilkan data yang sudah berhasil dimuat sebelumnya
                             _wisataState.value = UiState.Success(currentList.toList())
                         }
                     }
 
-                    is UiState.Loading -> {
-                        // Di-handle oleh penanda _wisataState.value = UiState.Loading di awal
-                    }
+                    is UiState.Loading -> {}
                 }
             } finally {
-                // Matikan status loading footer setelah proses paginasi selesai
+                // Nonaktifkan indikator Load More setelah proses selesai
                 isLoadingMore = false
                 _isLoadMore.value = false
             }
         }
     }
 
-    /**
-     * Memanggil API untuk mencari tempat wisata berdasarkan kata kunci (Keyword)
-     * @param keyword Kata kunci pencarian dari SearchView/EditText
-     */
+    // Fungsi untuk melakukan pencarian tempat wisata berdasarkan kata kunci (keyword)
     fun searchWisata(keyword: String) {
-        // Jika kata kunci kosong/blank, kembalikan ke daftar wisata normal
+        // Jika kata kunci kosong, kembalikan ke daftar wisata normal (halaman awal)
         if (keyword.isBlank()) {
             fetchWisata(isRefresh = true)
             return
@@ -130,29 +122,65 @@ class WisataViewModel : ViewModel() {
         isSearching = true
 
         viewModelScope.launch {
-            // Tampilkan indikator Loading utama di tengah layar
+            // Tampilkan state loading sebelum pemanggilan API pencarian
             _wisataState.value = UiState.Loading
-
             when (val result = repository.searchWisata(keyword)) {
                 is UiState.Success -> {
                     val searchData = result.data.data ?: emptyList()
-
-                    // Kirim data hasil pencarian langsung ke UI
                     _wisataState.value = UiState.Success(searchData)
-
-                    // Set totalPage ke 1 agar sistem paginasi bawah tidak aktif saat mode pencarian
-                    totalPage = 1
+                    totalPage = 1 // Reset total halaman menjadi 1 saat mode pencarian
                 }
-
                 is UiState.Error -> {
-                    // Teruskan pesan error dari repository ke UI
                     _wisataState.value = UiState.Error(result.message)
                 }
-
-                is UiState.Loading -> {
-                    // Di-handle oleh penanda _wisataState.value = UiState.Loading di awal
-                }
+                is UiState.Loading -> {}
             }
         }
+    }
+
+    // --- FUNGSI CRUD REAL API ---
+
+    // Fungsi untuk menambah data wisata baru menggunakan format RequestBody & MultipartBody
+    fun addWisata(
+        namaWisata: RequestBody,
+        kategori: RequestBody,
+        lokasi: RequestBody,
+        hargaTiket: RequestBody,
+        deskripsi: RequestBody,
+        foto: MultipartBody.Part
+    ) {
+        viewModelScope.launch {
+            _crudState.value = UiState.Loading
+            _crudState.value = repository.addWisata(namaWisata, kategori, lokasi, hargaTiket, deskripsi, foto)
+        }
+    }
+
+    // Fungsi untuk memperbarui data wisata yang sudah ada (foto bersifat opsional / nullable)
+    fun updateWisata(
+        id: RequestBody,
+        namaWisata: RequestBody,
+        kategori: RequestBody,
+        lokasi: RequestBody,
+        hargaTiket: RequestBody,
+        deskripsi: RequestBody,
+        foto: MultipartBody.Part? = null
+    ) {
+        viewModelScope.launch {
+            _crudState.value = UiState.Loading
+            _crudState.value = repository.updateWisata(id, namaWisata, kategori, lokasi, hargaTiket, deskripsi, foto)
+        }
+    }
+
+    // Fungsi untuk menghapus data wisata berdasarkan ID
+    fun deleteWisata(id: Int) {
+        viewModelScope.launch {
+            _crudState.value = UiState.Loading
+            _crudState.value = repository.deleteWisata(id)
+        }
+    }
+
+    // Memereset CRUD state setelah UI memproses aksi (mencegah komit ganda/pemicu ulang observer)
+    fun resetCrudState() {
+        _crudState.value = null
     }
 }

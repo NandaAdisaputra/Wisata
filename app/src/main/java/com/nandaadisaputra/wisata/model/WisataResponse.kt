@@ -2,6 +2,21 @@ package com.nandaadisaputra.wisata.model
 
 import com.google.gson.annotations.SerializedName
 
+
+/**
+ * Model response dasar untuk operasi CRUD (Create, Update, Delete).
+ * Biasanya hanya berisi konfirmasi status dan pesan dari server.
+ */
+data class BaseResponse(
+    @SerializedName("code")
+    val code: Int? = null,
+
+    @SerializedName("status")
+    val status: String? = null,
+
+    @SerializedName("message")
+    val message: String? = null
+)
 /**
  * Model response untuk daftar tempat wisata (List)
  */
