@@ -6,5 +6,6 @@ package com.nandaadisaputra.wisata.network
  */
 data class AuthRequest(
     val username: String,
-    val password: String
+    val password: String,
+    val role: String
 )

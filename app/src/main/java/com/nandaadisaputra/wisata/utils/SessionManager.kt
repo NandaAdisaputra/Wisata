@@ -22,13 +22,18 @@ class SessionManager(context: Context) {
      * Memproses dan menyimpan data sesi ketika login berhasil.
      * Menggunakan ekstensi edit {} agar perubahan dilakukan secara atomic dan aman.
      */
-    fun saveSession(token: String, userId: Int, username: String) {
+    fun saveSession(token: String, userId: Int, username: String,role: String) {
         pref.edit {
             putBoolean(IS_LOGIN, true)
             putString(KEY_TOKEN, token)
             putInt(KEY_USER_ID, userId)
             putString(KEY_USERNAME, username)
+            putString("KEY_ROLE", role)
+                .apply()
         }
+    }
+    fun getRole(): String? {
+        return pref.getString("KEY_ROLE", "user") // Default ke user jika kosong
     }
 
     /**

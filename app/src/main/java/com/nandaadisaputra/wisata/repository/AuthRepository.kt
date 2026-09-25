@@ -33,7 +33,8 @@ class AuthRepository(
                     sessionManager.saveSession(
                         token = token,
                         userId = user.id,
-                        username = user.username
+                        username = user.username,
+                        role = user.role
                     )
                 }
 
@@ -106,4 +107,6 @@ class AuthRepository(
      * Mengambil token autentikasi dari sesi tersimpan.
      */
     fun getToken(): String? = sessionManager.getToken()
+    // Tambahkan fungsi untuk mengambil role di bagian bawah AuthRepository:
+    fun getRole(): String? = sessionManager.getRole()
 }

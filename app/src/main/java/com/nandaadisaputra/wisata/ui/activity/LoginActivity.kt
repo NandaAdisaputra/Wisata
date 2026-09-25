@@ -41,9 +41,14 @@ class LoginActivity : AppCompatActivity() {
         // 1. Inisialisasi SessionManager dengan context Activity
         sessionManager = SessionManager(this)
 
-        // 2. Auto-Login Check: Jika sesi pengguna masih aktif (sudah login), langsung alihkan ke MainActivity tanpa perlu meng-inflate layout XML
+        // 2. Auto-Login Check dengan pembagian Role
         if (sessionManager.isLoggedIn()) {
-            startActivity<MainActivity>(clearTask = true)
+            val role = sessionManager.getRole()
+            if (role == "admin") {
+                startActivity<AdminWisataActivity>(clearTask = true) // Navigasi ke Dashboard Admin
+            } else {
+                startActivity<MainActivity>(clearTask = true)  // Navigasi ke Dashboard User
+            }
             finish()
             return
         }
@@ -58,41 +63,67 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // Mengatur listener event klik untuk tombol Login dan tombol navigasi ke halaman Register
+    // Fungsi ini bertugas untuk mengatur semua aksi klik (listener) pada elemen antarmuka (UI) di halaman Login
     private fun setupActionListeners() {
-        // Event listener saat tombol Login diklik
+
+        // Mengatur aksi ketika tombol Login (btnLogin) diklik.
+        // Menggunakan ekstensi setOnSingleClickListener untuk mencegah pengguna menekan tombol berkali-kali secara cepat (mencegah spam klik yang bisa membuat API error).
         binding.btnLogin.setOnSingleClickListener {
-            // Menyembunyikan papan ketik (keyboard) lunak
+
+            // Menyembunyikan papan ketik (keyboard virtual) dari layar agar tidak menghalangi tampilan saat proses login (loading) berjalan.
             hideKeyboard()
 
-            // Membaca teks input yang sudah dibersihkan dari spasi awal/akhir menggunakan extension property trimmedText
+            // 1. Mengambil data input dari pengguna
+            // Mengambil teks dari kolom EditText username.
+            // 'trimmedText' adalah fungsi ekstensi yang otomatis menghapus spasi kosong yang tidak sengaja terketik di awal atau akhir kata.
             val username = binding.edtUsername.trimmedText
+
+            // Mengambil teks dari kolom EditText password dan membersihkan spasi berlebih.
             val password = binding.edtPassword.trimmedText
 
-            // Reset indikator error lokal pada input field sebelum melakukan validasi ulang
+            // 2. Menentukan Role berdasarkan pilihan pengguna di antarmuka (RadioGroup)
+            // Mengecek apakah komponen RadioButton untuk Admin (rbAdmin) sedang dipilih/dicentang oleh pengguna.
+            val role = if (binding.rbAdmin.isChecked) {
+                "admin" // Jika dicentang, maka nilai variabel role diatur menjadi "admin"
+            } else {
+                "user"  // Jika tidak dicentang (berarti RadioButton User yang terpilih), maka nilai role diatur menjadi "user"
+            }
+
+            // Menghapus pesan error (tulisan merah) yang mungkin masih menempel di kolom input dari percobaan login yang gagal sebelumnya.
             clearInputErrors(binding.edtUsername, binding.edtPassword)
 
-            // Validasi input form sebelum melakukan panggilan API login
+            // 3. Proses Validasi Form Input
+            // Memeriksa kondisi kolom input satu per satu menggunakan blok 'when' (pengganti if-else berantai di Kotlin).
             when {
-                // Jika username kosong, tampilkan pesan error dan berikan fokus pada input field
+                // Pengecekan 1: Jika kolom username ternyata masih kosong
                 username.isEmpty() -> {
+                    // Munculkan pesan peringatan di bawah kolom username
                     binding.edtUsername.error = "Username tidak boleh kosong!"
+                    // Pindahkan kursor secara otomatis ke kolom username agar pengguna langsung bisa mengetik
                     binding.edtUsername.requestFocus()
                 }
-                // Jika password kosong, tampilkan pesan error dan berikan fokus pada input field
+
+                // Pengecekan 2: Jika kolom password ternyata masih kosong
                 password.isEmpty() -> {
+                    // Munculkan pesan peringatan di bawah kolom password
                     binding.edtPassword.error = "Password tidak boleh kosong!"
+                    // Pindahkan kursor secara otomatis ke kolom password
                     binding.edtPassword.requestFocus()
                 }
-                // Jika seluruh input valid, jalankan fungsi login pada ViewModel
+
+                // Kondisi default (else): Jika semua kolom input sudah terisi dengan benar (lolos validasi)
                 else -> {
-                    viewModel.login(AuthRequest(username, password))
+                    // 4. Mengirimkan data kredensial ke Server/API
+                    // Menggabungkan username, password, dan role yang sudah diambil ke dalam satu model data AuthRequest.
+                    // Kemudian, memerintahkan ViewModel untuk menjalankan fungsi login() dengan membawa data tersebut ke server.
+                    viewModel.login(AuthRequest(username, password, role))
                 }
             }
         }
 
-        // Event listener untuk berpindah ke RegisterActivity saat teks/tombol registrasi diklik
+        // Mengatur aksi ketika tombol atau teks "Belum punya akun? Daftar" (tvGoToRegister) diklik.
         binding.tvGoToRegister.setOnSingleClickListener {
-            // Menggunakan extension generic startActivity<T>() untuk navigasi
+            // Melakukan navigasi atau perpindahan halaman menuju layar Pendaftaran (RegisterActivity).
             startActivity<RegisterActivity>()
         }
     }
@@ -115,11 +146,13 @@ class LoginActivity : AppCompatActivity() {
                 binding.btnLogin.isEnabled = true
                 showToast(response.message)
 
-                // Sesi login telah otomatis disimpan di AuthRepository saat API bernilai sukses
-
-                // Navigasi ke MainActivity dengan flag CLEAR_TASK (menghapus stack Activity sebelumnya)
-                startActivity<MainActivity>(clearTask = true)
-                // Menutup LoginActivity agar pengguna tidak dapat kembali ke halaman login melalui tombol Back
+                // Pengecekan role saat login berhasil
+                val role = response.user?.role
+                if (role == "admin") {
+                    startActivity<AdminWisataActivity>(clearTask = true) // Navigasi ke Dashboard Admin
+                } else {
+                    startActivity<MainActivity>(clearTask = true)  // Navigasi ke Dashboard User
+                }
                 finish()
             },
             // Callback yang dieksekusi ketika proses login mengalami kegagalan/error

@@ -48,11 +48,16 @@ class RegisterActivity : AppCompatActivity() {
             // Membaca input teks dari EditText dan menghapus spasi berlebih di awal/akhir string
             val username = binding.edtUsername.text.toString().trim()
             val password = binding.edtPassword.text.toString().trim()
-
+            // Mengambil nilai role dari RadioGroup yang dipilih
+            val role = if (binding.rbAdmin.isChecked) {
+                "admin"
+            } else {
+                "user"
+            }
             // Validasi kelengkapan teks pada formulir pendaftaran
             if (username.isNotEmpty() && password.isNotEmpty()) {
                 // Mengirimkan permintaan data pendaftaran ke server melalui AuthViewModel
-                viewModel.register(AuthRequest(username, password))
+                viewModel.register(AuthRequest(username, password, role))
             } else {
                 // Menampilkan pesan Toast peringatan jika ada input field yang belum terisi
                 showToast("Harap isi semua kolom!")

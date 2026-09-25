@@ -74,4 +74,6 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
      * Mengambil ID pengguna yang tersimpan di sesi.
      */
     fun getUserId(): Int = repository.getUserId()
+    // AuthViewModel.kt (Tambahkan di bagian bawah)
+    fun getRole(): String? = repository.getRole()
 }
