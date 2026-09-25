@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.nandaadisaputra.wisata.databinding.FragmentHomeBinding
+import com.nandaadisaputra.wisata.databinding.FragmentHomeAdminBinding
 import com.nandaadisaputra.wisata.ui.activity.AddWisataActivity
 import com.nandaadisaputra.wisata.ui.activity.DetailWisataActivity
 import com.nandaadisaputra.wisata.ui.adapter.WisataAdapter
@@ -23,7 +23,7 @@ import com.nandaadisaputra.wisata.viewmodel.WisataViewModel
 class HomeAdminFragment: Fragment() {
 
     // Menyimpan referensi nullable untuk View Binding agar menghindari memory leak
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentHomeAdminBinding? = null
     // Properti non-null binding yang hanya valid digunakan antara onCreateView dan onDestroyView
     private val binding get() = _binding!!
 
@@ -50,7 +50,7 @@ class HomeAdminFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Menginisialisasi View Binding untuk layout FragmentHome
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentHomeAdminBinding.inflate(inflater, container, false)
         return binding.root
     }
 

@@ -7,7 +7,7 @@ import com.nandaadisaputra.wisata.R
 import com.nandaadisaputra.wisata.databinding.ActivityMainBinding
 import com.nandaadisaputra.wisata.ui.fragment.FavoriteFragment
 import com.nandaadisaputra.wisata.ui.fragment.HomeAdminFragment
-import com.nandaadisaputra.wisata.ui.fragment.HomeFragment
+import com.nandaadisaputra.wisata.ui.fragment.HomeUserFragment
 import com.nandaadisaputra.wisata.ui.fragment.ProfileFragment
 import com.nandaadisaputra.wisata.utils.setupActionBar
 
@@ -31,7 +31,7 @@ class AdminWisataActivity : AppCompatActivity() {
 
         // Memastikan fragment default (HomeFragment) hanya dimuat saat Activity pertama kali dibuat (bukan saat rekonstruksi/rotasi layar)
         if (savedInstanceState == null) {
-            replaceFragment(HomeFragment(), "Daftar Wisata")
+            replaceFragment(HomeUserFragment(), "Daftar Wisata")
         }
     }
 

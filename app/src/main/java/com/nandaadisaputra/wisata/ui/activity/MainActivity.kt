@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import com.nandaadisaputra.wisata.R
 import com.nandaadisaputra.wisata.databinding.ActivityMainBinding
 import com.nandaadisaputra.wisata.ui.fragment.FavoriteFragment
-import com.nandaadisaputra.wisata.ui.fragment.HomeFragment
+import com.nandaadisaputra.wisata.ui.fragment.HomeUserFragment
 import com.nandaadisaputra.wisata.ui.fragment.ProfileFragment
 import com.nandaadisaputra.wisata.utils.setupActionBar
 
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
 
         // Memastikan fragment default (HomeFragment) hanya dimuat saat Activity pertama kali dibuat (bukan saat rekonstruksi/rotasi layar)
         if (savedInstanceState == null) {
-            replaceFragment(HomeFragment(), "Daftar Wisata")
+            replaceFragment(HomeUserFragment(), "Daftar Wisata")
         }
     }
 
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 // Jika menu Home diklik, berpindah ke HomeFragment dan perbarui judul Action Bar
                 R.id.navigation_home -> {
-                    replaceFragment(HomeFragment(), "Daftar Wisata")
+                    replaceFragment(HomeUserFragment(), "Daftar Wisata")
                     true
                 }
                 // Jika menu Favorite diklik, berpindah ke FavoriteFragment dan perbarui judul Action Bar

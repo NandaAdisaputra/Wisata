@@ -24,6 +24,7 @@ import java.text.NumberFormat
 import java.util.Locale
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import com.nandaadisaputra.wisata.ui.activity.DetailWisataUserActivity
 
 // ============================================================================
 // 1. VIEW & VISIBILITY EXTENSIONS
@@ -138,7 +139,7 @@ fun Int?.toRupiahFormat(): String {
  * Navigasi perpindahan ke DetailWisataActivity.
  */
 fun Context.startDetailWisataActivity(wisata: Wisata) {
-    val intent = Intent(this, DetailWisataActivity::class.java).apply {
+    val intent = Intent(this, DetailWisataUserActivity::class.java).apply {
         putExtra(DetailWisataActivity.EXTRA_WISATA, wisata)
         putExtra(DetailWisataActivity.EXTRA_ID, wisata.id)
     }
