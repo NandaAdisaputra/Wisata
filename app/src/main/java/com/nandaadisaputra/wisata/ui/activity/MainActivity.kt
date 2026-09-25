@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import com.nandaadisaputra.wisata.R
 import com.nandaadisaputra.wisata.databinding.ActivityMainBinding
 import com.nandaadisaputra.wisata.ui.fragment.FavoriteFragment
+import com.nandaadisaputra.wisata.ui.fragment.FavoriteUserFragment
 import com.nandaadisaputra.wisata.ui.fragment.HomeUserFragment
 import com.nandaadisaputra.wisata.ui.fragment.ProfileFragment
 import com.nandaadisaputra.wisata.utils.setupActionBar
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 // Jika menu Favorite diklik, berpindah ke FavoriteFragment dan perbarui judul Action Bar
                 R.id.navigation_favorite -> {
-                    replaceFragment(FavoriteFragment(), "Wisata Favorit")
+                    replaceFragment(FavoriteUserFragment(), "Wisata Favorit")
                     true
                 }
                 // Jika menu Profile diklik, berpindah ke ProfileFragment dan perbarui judul Action Bar
