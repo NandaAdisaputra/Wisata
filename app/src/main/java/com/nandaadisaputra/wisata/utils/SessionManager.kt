@@ -6,60 +6,76 @@ import androidx.core.content.edit
 
 class SessionManager(context: Context) {
 
-    // SharedPreferences: Tempat menyimpan data sederhana berpasangan Key-Value di penyimpanan internal HP
+    // SharedPreferences untuk menyimpan data sesi pengguna
     private val pref: SharedPreferences =
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
     companion object {
-        private const val PREF_NAME = "wisata_session" // Nama file SharedPreferences
-        private const val IS_LOGIN = "is_login"       // Key untuk status login (Boolean)
-        private const val KEY_TOKEN = "key_token"     // Key untuk menyimpan token JWT/API
-        private const val KEY_USER_ID = "key_user_id" // Key untuk menyimpan ID user
-        private const val KEY_USERNAME = "key_username" // Key untuk menyimpan username
+        private const val PREF_NAME = "wisata_session"
+
+        // Key SharedPreferences
+        private const val IS_LOGIN = "is_login"
+        private const val KEY_TOKEN = "key_token"
+        private const val KEY_USER_ID = "key_user_id"
+        private const val KEY_USERNAME = "key_username"
+        private const val KEY_ROLE = "key_role"
     }
 
     /**
-     * Memproses dan menyimpan data sesi ketika login berhasil.
-     * Menggunakan ekstensi edit {} agar perubahan dilakukan secara atomic dan aman.
+     * Menyimpan data sesi ketika login berhasil.
      */
-    fun saveSession(token: String, userId: Int, username: String,role: String) {
+    fun saveSession(
+        token: String,
+        userId: Int,
+        username: String,
+        role: String
+    ) {
         pref.edit {
             putBoolean(IS_LOGIN, true)
             putString(KEY_TOKEN, token)
             putInt(KEY_USER_ID, userId)
             putString(KEY_USERNAME, username)
-            putString("KEY_ROLE", role)
-                .apply()
+            putString(KEY_ROLE, role)
         }
     }
+
+    /**
+     * Mengambil role pengguna.
+     */
     fun getRole(): String? {
-        return pref.getString("KEY_ROLE", "user") // Default ke user jika kosong
+        return pref.getString(KEY_ROLE, "user")
     }
 
     /**
-     * Mengecek apakah pengguna sedang dalam keadaan login.
-     * Mengembalikan nilai default 'false' jika key IS_LOGIN belum ada.
+     * Mengecek apakah pengguna sudah login.
      */
-    fun isLoggedIn(): Boolean = pref.getBoolean(IS_LOGIN, false)
+    fun isLoggedIn(): Boolean {
+        return pref.getBoolean(IS_LOGIN, false)
+    }
 
     /**
-     * Mengambil token autentikasi yang tersimpan.
+     * Mengambil token.
      */
-    fun getToken(): String? = pref.getString(KEY_TOKEN, null)
+    fun getToken(): String? {
+        return pref.getString(KEY_TOKEN, null)
+    }
 
     /**
-     * Mengambil nama pengguna yang tersimpan.
+     * Mengambil username.
      */
-    fun getUsername(): String? = pref.getString(KEY_USERNAME, null)
+    fun getUsername(): String? {
+        return pref.getString(KEY_USERNAME, null)
+    }
 
     /**
-     * Mengambil ID pengguna yang tersimpan.
-     * Mengembalikan -1 jika data tidak ditemukan.
+     * Mengambil ID user.
      */
-    fun getUserId(): Int = pref.getInt(KEY_USER_ID, -1)
+    fun getUserId(): Int {
+        return pref.getInt(KEY_USER_ID, -1)
+    }
 
     /**
-     * Menghapus seluruh data sesi (digunakan saat Logout).
+     * Menghapus seluruh data sesi.
      */
     fun clearSession() {
         pref.edit {

@@ -1,11 +1,9 @@
 package com.nandaadisaputra.wisata.network
 
 /**
- * Data class ini merepresentasikan data yang akan dikirim (POST) ke server.
- * Properti di dalamnya harus sesuai dengan yang dibutuhkan oleh API (username & password).
+ * Data class untuk request login ke API.
  */
 data class AuthRequest(
     val username: String,
-    val password: String,
-    val role: String
+    val password: String
 )

@@ -25,8 +25,8 @@ class AuthRepository(
             val body = response.body()
 
             if (response.isSuccessful && body != null && body.status == "success") {
-                val token = body.token
-                val user = body.user
+                val token = body.data?.token
+                val user = body.data?.user
 
                 // Simpan token dan data user ke SharedPreferences jika login sukses
                 if (!token.isNullOrEmpty() && user != null) {

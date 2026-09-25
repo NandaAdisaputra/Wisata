@@ -57,7 +57,7 @@ class RegisterActivity : AppCompatActivity() {
             // Validasi kelengkapan teks pada formulir pendaftaran
             if (username.isNotEmpty() && password.isNotEmpty()) {
                 // Mengirimkan permintaan data pendaftaran ke server melalui AuthViewModel
-                viewModel.register(AuthRequest(username, password, role))
+                viewModel.register(AuthRequest(username, password))
             } else {
                 // Menampilkan pesan Toast peringatan jika ada input field yang belum terisi
                 showToast("Harap isi semua kolom!")
